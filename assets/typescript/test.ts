@@ -35,9 +35,9 @@ export class test extends Component {
     start () {
         // [3]
         const compoent:any = this.towerNode.getComponent('Tower')
-        compoent.init(this.enemyNode)
+        compoent.initRotate(this.enemyNode)
         setTimeout(() => {
-            compoent.init(this.testNode)
+            compoent.initRotate(this.testNode)
         }, 2000)
     }
 

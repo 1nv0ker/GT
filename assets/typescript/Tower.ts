@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Vec3, math, tween } from 'cc';
+import { _decorator, Component, Node, Vec3, math, tween, AnimationClip, animation, instantiate } from 'cc';
 const { ccclass, property } = _decorator;
 import { randomInt, RotationByNode } from '../utils/tools'
 /**
@@ -29,24 +29,43 @@ export class Tower extends Component {
     @property({type: Node})
     public originNode: Node = null;
 
-    speed = 1.0
+    @property({type:Node})
+    public ammoNode: Node = null
+
+    speed = 0.2
+
+    distance = 0;
 
     start () {
         if (!this.towerNode || !this.originNode) return
+
+        this.loadAmmo()
     }
 
     setAttackSpeed(num:number) {
         this.speed = num
     }
 
-    init(targetNode:Node) {
+    /**
+     * 炮管旋转
+     * @param target 转动的目标或者坐标
+     * @returns void
+     */
+    initRotate(target:Node | Vec3) {
         if (!this.towerNode || !this.originNode) return
         
         const targetVec = this.towerNode.getWorldPosition()
 
         const originVec = this.originNode.getWorldPosition()
 
-        const rad = this.getRad(targetNode.getWorldPosition(), originVec)
+
+        let vec = new Vec3()
+        if (target instanceof Node) {
+            vec = target.getWorldPosition()
+        } else {
+            vec = target
+        }
+        const rad = this.getRad(vec, originVec)
         const rad1 = this.getRad(targetVec, originVec)
 
         const distance = this.getDistance(targetVec, originVec)
@@ -59,16 +78,17 @@ export class Tower extends Component {
         const newX = distance*Math.cos(rad)
         const newY = distance*Math.sin(rad)
         
-        
-
+        //角度转动缓动效果
         tween(this.towerNode.eulerAngles)
         .to(this.speed, new Vec3(0, 0, newAngel), {
             onUpdate: (target:Vec3, ratio:number) => {
+                // console.log('target', target.z, target.z)
                 this.towerNode.setRotationFromEuler(target)
             }
         })
         .start()
 
+        //坐标缓动效果
         tween(this.towerNode.position)
         .to(this.speed, new Vec3(newX, newY, 0), {
             onUpdate: (target:Vec3, ratio:number) => {
@@ -77,6 +97,45 @@ export class Tower extends Component {
         })
         .start()
 
+    }
+
+    /**
+     * 初始化新炮弹
+     */
+    initAttack() {
+        let distance = 0
+        const newNode = instantiate(this.ammoNode)
+        const tempNode = instantiate(this.towerNode)
+        let _this = this
+
+        launch(distance)
+        /**
+         * 开始发射炮弹
+         * @param distance 炮弹移动距离
+         */
+        function launch(distance:number) {
+            const angel = tempNode.eulerAngles.z
+            const rad = math.toRadian(angel)
+            const newX = distance*Math.cos(rad)
+            const newY = distance*Math.sin(rad)
+            newNode.setPosition(newX, newY, 0)
+            _this.node.addChild(newNode)
+        }
+        setInterval(() => {
+            distance++
+            launch(distance)
+        })
+        // this.distance++
+        // if (Math.abs(newX)>=480 || Math.abs(newY)>=320) {
+        //     this.distance = 0
+        // }
+        // 
+    }
+    loadAmmo() {
+        this.initAttack()
+        setInterval(() => {
+            this.initAttack()
+        }, 500)
     }
 
     getRad(p1:Vec3, p2:Vec3):number {
@@ -89,6 +148,7 @@ export class Tower extends Component {
 
 
     update (deltaTime: number) {
+        // this.initAttack()
         // this.init()
         // [4]
         // console.log('deltaTime', new Date().getTime())
