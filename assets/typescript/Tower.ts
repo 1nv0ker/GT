@@ -32,9 +32,11 @@ export class Tower extends Component {
     @property({type:Node})
     public ammoNode: Node = null
 
-    speed = 0.2
+    rotateSpeed = 0.2
 
     distance = 0;
+
+    attackSpeed = 500
 
     start () {
         if (!this.towerNode || !this.originNode) return
@@ -42,9 +44,25 @@ export class Tower extends Component {
         this.loadAmmo()
     }
 
-    setAttackSpeed(num:number) {
-        this.speed = num
+    /**
+     * 设置炮塔旋转速度
+     * @param num 
+     */
+    setRotateSpeed(num:number) {
+        this.rotateSpeed = num
     }
+
+    /**
+     * 设置炮弹加载速度
+     * @param num 
+     */
+    setAttackSpeed(num:number) {
+        this.attackSpeed = num
+    }
+
+    /**
+     * 
+     */
 
     /**
      * 炮管旋转
@@ -80,7 +98,7 @@ export class Tower extends Component {
         
         //角度转动缓动效果
         tween(this.towerNode.eulerAngles)
-        .to(this.speed, new Vec3(0, 0, newAngel), {
+        .to(this.rotateSpeed, new Vec3(0, 0, newAngel), {
             onUpdate: (target:Vec3, ratio:number) => {
                 // console.log('target', target.z, target.z)
                 this.towerNode.setRotationFromEuler(target)
@@ -90,7 +108,7 @@ export class Tower extends Component {
 
         //坐标缓动效果
         tween(this.towerNode.position)
-        .to(this.speed, new Vec3(newX, newY, 0), {
+        .to(this.rotateSpeed, new Vec3(newX, newY, 0), {
             onUpdate: (target:Vec3, ratio:number) => {
                 this.towerNode.setPosition(target)
             }
@@ -135,7 +153,7 @@ export class Tower extends Component {
         this.initAttack()
         setInterval(() => {
             this.initAttack()
-        }, 500)
+        }, this.attackSpeed)
     }
 
     getRad(p1:Vec3, p2:Vec3):number {

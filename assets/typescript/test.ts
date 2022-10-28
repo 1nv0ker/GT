@@ -1,7 +1,7 @@
 
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
-
+import { randomInt, RotationByNode } from '../utils/tools'
 /**
  * Predefined variables
  * Name = test
@@ -36,8 +36,11 @@ export class test extends Component {
         // [3]
         const compoent:any = this.towerNode.getComponent('Tower')
         compoent.initRotate(this.enemyNode)
-        setTimeout(() => {
-            compoent.initRotate(this.testNode)
+        
+        setInterval(() => {
+            const vec = new Vec3()
+            Vec3.random(vec, 400)
+            compoent.initRotate(vec)
         }, 2000)
     }
 
