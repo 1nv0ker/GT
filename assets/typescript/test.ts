@@ -37,11 +37,11 @@ export class test extends Component {
         const compoent:any = this.towerNode.getComponent('Tower')
         compoent.initRotate(this.enemyNode)
         
-        setInterval(() => {
+        this.schedule(() => {
             const vec = new Vec3()
             Vec3.random(vec, 400)
             compoent.initRotate(vec)
-        }, 2000)
+        }, 2)
     }
 
     // update (deltaTime: number) {

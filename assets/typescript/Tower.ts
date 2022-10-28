@@ -36,7 +36,7 @@ export class Tower extends Component {
 
     distance = 0;
 
-    attackSpeed = 500
+    attackSpeed = 0.5
 
     start () {
         if (!this.towerNode || !this.originNode) return
@@ -139,10 +139,10 @@ export class Tower extends Component {
             newNode.setPosition(newX, newY, 0)
             _this.node.addChild(newNode)
         }
-        setInterval(() => {
+        this.schedule(() => {
             distance++
             launch(distance)
-        })
+        }, 0.001)
         // this.distance++
         // if (Math.abs(newX)>=480 || Math.abs(newY)>=320) {
         //     this.distance = 0
@@ -151,7 +151,7 @@ export class Tower extends Component {
     }
     loadAmmo() {
         this.initAttack()
-        setInterval(() => {
+        this.schedule(() => {
             this.initAttack()
         }, this.attackSpeed)
     }
