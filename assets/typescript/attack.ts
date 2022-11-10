@@ -40,17 +40,17 @@ export class attack extends Component {
         this.loadAttack()
     }
     start () {
-        // this.startAttack()
 
         const collider = this.targetNode.getComponent(Collider2D)
         if (collider) {
-            console.log('collider', collider)
+            // console.log('collider', collider)
             collider.on(Contact2DType.BEGIN_CONTACT, this.onContact, this);
         }
-        // [3]
     }
-
-    onContact(event) {
+    /**
+     * 回调碰撞删除射击点
+     */
+    onContact() {
         const callback = this.callbacks[0]
         const newNode = callback.apply(this)
         
@@ -59,36 +59,31 @@ export class attack extends Component {
             this.enemyNodePool.refundNode(newNode)
         }
         this.callbacks.shift()
-        
-        // this.startAttack()
     }
-
+    /**
+     * 加载射线
+     */
     loadAttack() {
         this.outRay = new geometry.Ray()
         const vec = new Vec3()
         Vec3.random(vec, 300)
         this.targetNode.setPosition(vec)
         geometry.Ray.fromPoints(this.outRay, new Vec3(0, 0, 0), vec)
-        // this.callback = this.createLine()
-        // this.schedule(this.createLine(), 0.1)
-        // setTimeout(() => {
-        //     this.schedule(this.createLine(), 0.1)
-        // }, 300);
-        // setTimeout(() => {
-        //     this.schedule(this.createLine(), 0.1)
-        // }, 600);
     }
-
+    /**
+     * 使用闭包的方式
+     * @returns function
+     */
     createLine() {
         let distance = 0
         let tempVec = new Vec3()
         let newNode:Node;
-        let outRay = this.outRay
+        let outRay = this.outRay//缓存当前的射线
         return function() {
             if (newNode) {
                 this.enemyNodePool.refundNode(newNode)
             }
-            outRay.computeHit(tempVec, distance)
+            outRay.computeHit(tempVec, distance)//计算射线上的点坐标
             newNode = this.enemyNodePool.copyNode(this.point)
 
             newNode.setPosition(tempVec)
@@ -97,23 +92,18 @@ export class attack extends Component {
             distance+=5
             return newNode
         }
-        
-        // if (this.movingNode) {
-        //     this.enemyNodePool.refundNode(this.movingNode)
-        // }
-        
-        // this.movingNode = this.enemyNodePool.copyNode(this.point)
-        // this.movingNode.setPosition(tempVec)
-        // this.movingNode.active = true
-        // this.node.addChild(this.movingNode)
-        // this.distance+=5
     }
-
+    /**
+     * 开始射击
+     */
     onAttack() {
         const callback = this.createLine()
         this.callbacks.push(callback)
         this.schedule(callback, 0.01)
     }
+    /**
+     * 改变目标位置
+     */
     onChangeLocations() {
         this.loadAttack()
     }
