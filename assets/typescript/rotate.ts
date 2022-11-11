@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node, geometry, Vec3, Quat, math, Vec2, tween, instantiate, v2 } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -22,10 +22,38 @@ export class rotate extends Component {
     // [2]
     // @property
     // serializableDummy = 0;
+    @property(Node)
+    targetNode:Node;
 
+    @property(Node)
+    canvasNode:Node;
+
+    
     start () {
-        // [3]
+        // this.initRotate()
+
+        this.canvasNode.on(Node.EventType.MOUSE_MOVE, (event) => {
+            console.log(event.getUILocation().x, event.getUILocation().y)
+    
+            this.initRotate(new Vec3(event.getUILocation().x-480, event.getUILocation().y-320-0.5))
+        })
     }
+
+    initRotate(point:Vec3) {
+        const rad = this.getRad(this.node.getPosition(), point)
+ 
+        let angel = math.toDegree(rad)
+        // console.log(point.x, point.y)
+        if (point.x<=0) {
+            angel = angel+180
+        }
+        this.node.setRotationFromEuler(0, 0, angel)
+    }
+
+    getRad(p1:Vec3, p2:Vec3):number {
+        return Math.atan((p2.y-p1.y) / (p2.x-p1.x));
+    }
+
 
     // update (deltaTime: number) {
     //     // [4]
