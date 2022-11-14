@@ -1,5 +1,6 @@
 
-import { _decorator, Component, Node, geometry, Vec3, Quat, math, Vec2, tween, instantiate, v2 } from 'cc';
+import { _decorator, Component, Node, geometry, Vec3, Quat, math, Vec2, tween, instantiate, v2, view } from 'cc';
+import { debounce } from '../utils/tools';
 const { ccclass, property } = _decorator;
 
 /**
@@ -31,22 +32,24 @@ export class rotate extends Component {
     
     start () {
         // this.initRotate()
-
-        this.canvasNode.on(Node.EventType.MOUSE_MOVE, (event) => {
-            console.log(event.getUILocation().x, event.getUILocation().y)
-    
-            this.initRotate(new Vec3(event.getUILocation().x-480, event.getUILocation().y-320-0.5))
-        })
+        
+        this.canvasNode.on(Node.EventType.MOUSE_MOVE, debounce(this.initRotate), this)
     }
 
-    initRotate(point:Vec3) {
+    initRotate(event) {
+        const size = view.getVisibleSize()
+        let point = new Vec3(event.getUILocation().x-size.x/2, event.getUILocation().y-size.y/2)
         const rad = this.getRad(this.node.getPosition(), point)
  
         let angel = math.toDegree(rad)
-        // console.log(point.x, point.y)
-        if (point.x<=0) {
+        
+        if (point.x<=this.node.getPosition().x) {
             angel = angel+180
         }
+        // tween(this.node).to(1.0, {
+        //     angle: angel
+        // })
+        // .start()
         this.node.setRotationFromEuler(0, 0, angel)
     }
 

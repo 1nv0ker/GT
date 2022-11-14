@@ -34,3 +34,20 @@ export function RotationByNode(rad:number, nodeLen:number ):Vec3 {
     const vec = new Vec3(newX, newY, 0)
     return vec
 }
+
+
+export function debounce(fn:Function, delay=100) {
+    let timer = null
+
+    return function() {
+        if (timer) {
+            clearTimeout(timer)
+        }
+        timer = setTimeout(() => {
+            fn.apply(this, arguments)
+        }, delay);
+    } 
+}
+
+
+
