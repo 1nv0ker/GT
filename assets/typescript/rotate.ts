@@ -1,6 +1,5 @@
 
-import { _decorator, Component, Node, geometry, Vec3, Quat, math, Vec2, tween, instantiate, v2, view } from 'cc';
-import { debounce } from '../utils/tools';
+import { _decorator, Component, Node, Vec3, math, view } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -17,23 +16,13 @@ const { ccclass, property } = _decorator;
  
 @ccclass('rotate')
 export class rotate extends Component {
-    // [1]
-    // dummy = '';
 
-    // [2]
-    // @property
-    // serializableDummy = 0;
-    @property(Node)
-    targetNode:Node;
-
+    //场景节点
     @property(Node)
     canvasNode:Node;
 
-    
     start () {
-        // this.initRotate()
-        
-        this.canvasNode.on(Node.EventType.MOUSE_MOVE, debounce(this.initRotate), this)
+        this.canvasNode.on(Node.EventType.MOUSE_MOVE, this.initRotate, this)
     }
 
     initRotate(event) {
@@ -46,15 +35,21 @@ export class rotate extends Component {
         if (point.x<=this.node.getPosition().x) {
             angel = angel+180
         }
-        // tween(this.node).to(1.0, {
-        //     angle: angel
-        // })
-        // .start()
+
         this.node.setRotationFromEuler(0, 0, angel)
     }
-
+    /**
+     * 
+     * @param p1 
+     * @param p2 
+     * @returns 获取转动的角度
+     */
     getRad(p1:Vec3, p2:Vec3):number {
         return Math.atan((p2.y-p1.y) / (p2.x-p1.x));
+    }
+
+    destroyed() {
+        this.canvasNode.off(Node.EventType.MOUSE_MOVE, this.initRotate, this)
     }
 
 
