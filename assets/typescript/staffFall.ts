@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label } from 'cc';
+import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label, PhysicsSystem2D } from 'cc';
 const { ccclass, property } = _decorator;
 import NodeCache from '../utils/NodeCache';
 
@@ -31,19 +31,23 @@ export class staffFall extends Component {
     @property(Label)
     score:Label
 
-    enemyNodePool:NodeCache;
+    ballNodePool:NodeCache;
+
+    pointNodePool:NodeCache;
 
     newNodeCount = 0;
     deleteCount =  0;
-    callback:Function;
+    callbacks:Function[] = [];
 
     count:number = 0;
     // [2]
     // @property
     // serializableDummy = 0;
     onLoad() {
-        this.enemyNodePool = new NodeCache('ball')
+        this.ballNodePool = new NodeCache('ball')
+        this.pointNodePool = new NodeCache('point')
         this.initBalls()
+        
     }
     start () {
         // [3]
@@ -51,20 +55,15 @@ export class staffFall extends Component {
         const collider = this.node.getComponent(Collider2D)
         
         if (collider) {
-            // console.log('collider', collider)
             collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            // collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D) {
-        // console.log('onEndContact', otherCollider.node.name)
         setTimeout(() => {
-            // otherCollider.node.destroy()
             this.deleteCount++
-            this.enemyNodePool.refundNode(otherCollider.node)
+            otherCollider.node && otherCollider.node.destroy()
+            // this.ballNodePool.refundNode(otherCollider.node)
         }, 1);
-
-        // this.enemyNodePool.refundNode(otherCollider.node)
         
     }
 
@@ -75,10 +74,10 @@ export class staffFall extends Component {
         return function() {
             let newNode:Node;
             // if (newNode) {
-            //     this.enemyNodePool.refundNode(newNode)
+            //     this.ballNodePool.refundNode(newNode)
             // }
             // console.log(this.newNodeCount, this.deleteCount)
-            // newNode = this.enemyNodePool.copyNode(this.ball)
+            // newNode = this.ballNodePool.copyNode(this.ball)
             newNode = instantiate(this.ball)
             this.newNodeCount++;
             const x = randomInt(-450, 10)
@@ -88,26 +87,18 @@ export class staffFall extends Component {
             const collider = newNode.getComponent(Collider2D)
             if (collider) {
                 collider.on(Contact2DType.BEGIN_CONTACT, (selfCollider: Collider2D, otherCollider: Collider2D)=>{
-                    if (otherCollider.node.name === 'point') {
+                    if (otherCollider.node.name === this.point.name) {
+                        
                         setTimeout(() => {
                             this.count++
                             this.score.string = `得分:${this.count}`
                             otherCollider.node && otherCollider.node.destroy()
                             selfCollider.node && selfCollider.node.destroy()
-                            // this.enemyNodePool.refundNode(selfCollider.node)
+                            // this.node.parent.removeChild(otherCollider.node)
+                            // this.pointNodePool.refundNode(otherCollider.node)
+                            // this.ballNodePool.refundNode(selfCollider.node)
                         }, 1);
                     }
-                    // if (this.callback) {
-                    //     const callback = this.callback;
-                    //     const tempNode = callback.apply(this)
-                    //     this.unschedule(callback)
-                    //     if (tempNode) {
-                    //         setTimeout(() => {
-                    //             tempNode.destroy()
-                    //         }, 1);
-                    //         // this.enemyNodePool.refundNode(newNode)
-                    //     }
-                    // }
                 }, this);
             }
         }
@@ -117,6 +108,7 @@ export class staffFall extends Component {
         const point = new Vec3(event.getUILocation().x-size.x/2, event.getUILocation().y-size.y/2)
         // this.unscheduleAllCallbacks()
         // this.unschedule(this.callback)
+        console.log(point.x, point.y)
         this.onAttak(point)
     }
 
@@ -130,15 +122,20 @@ export class staffFall extends Component {
         let newNode:Node;
         return function() {
             if (newNode) {
-                newNode.destroy()
-                // this.enemyNodePool.refundNode(newNode)
+                distance+=5
+                outRay.computeHit(tempVec, distance)//计算射线上的点坐标
+                // console.log(newNode)
+                newNode.active && newNode.setPosition(tempVec)
+                // newNode.destroy()
+                // this.pointNodePool.refundNode(newNode)
+                return newNode
             }
             outRay.computeHit(tempVec, distance)//计算射线上的点坐标
-            // newNode = this.enemyNodePool.copyNode(this.point)
+            // newNode = this.pointNodePool.copyNode(this.point)
             newNode = instantiate(this.point)
             newNode.setPosition(tempVec)
-            newNode.active = true
             this.node.parent.addChild(newNode)
+            newNode.active = true
             distance+=5
             return newNode
         }
@@ -147,8 +144,8 @@ export class staffFall extends Component {
         const outRay = new geometry.Ray()
 
         geometry.Ray.fromPoints(outRay, this.tower.getPosition(), point)
-        this.callback = this.createLine(outRay)
-        this.schedule(this.callback, 0.01)
+        
+        this.schedule(this.createLine(outRay), 0.01)
     }
 
 
