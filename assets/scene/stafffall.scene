@@ -498,7 +498,7 @@
       "__type__": "cc.Color",
       "r": 0,
       "g": 0,
-      "b": 255,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
@@ -1009,9 +1009,6 @@
     "__prefab": null,
     "ball": {
       "__id__": 5
-    },
-    "forzenBall": {
-      "__id__": 10
     },
     "point": {
       "__id__": 15

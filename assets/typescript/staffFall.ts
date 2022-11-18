@@ -23,9 +23,6 @@ export class staffFall extends Component {
     ball:Node;
 
     @property(Node)
-    forzenBall:Node;
-
-    @property(Node)
     point:Node;
 
     @property(Node)
@@ -42,12 +39,17 @@ export class staffFall extends Component {
     deleteCount =  0;
     callbacks:Function[] = [];
 
+    newNodes:Node[] = [];
+
     count:number = 0;
     gravityScale:number = 1;
-
+    createSpeed:number = 0.5
     forzenTimer:number = 0
     speedTimer:number = 0
     speed:number = 0.01
+
+    bulletSpeed:number = 5
+    bulletTimer:number = 0
     // [2]
     // @property
     // serializableDummy = 0;
@@ -76,7 +78,7 @@ export class staffFall extends Component {
     }
 
     initBalls() {
-        this.schedule(this.createBall, 0.1)
+        this.schedule(this.createBall, this.createSpeed)
     }
     randomBallNode() {
         const sign = randomInt(1, 50)
@@ -107,10 +109,15 @@ export class staffFall extends Component {
         if (sign === 50) {
             const sprite = newNode.getComponent(Sprite)
             sprite.color = math.color(0, 0, 255)
-        } else if (sign === 49) {
+        } 
+        else if (sign === 49) {
             const sprite = newNode.getComponent(Sprite)
             sprite.color = math.color(255, 255, 0)
-        }
+        } 
+        // else if (sign === 48) {
+        //     const sprite = newNode.getComponent(Sprite)
+        //     sprite.color = math.color(0, 0, 0)
+        // }
         else {
             const UI = newNode.getComponent(UITransform)
             UI.contentSize = this.randomSize(newNode)
@@ -127,27 +134,44 @@ export class staffFall extends Component {
                     
                     setTimeout(() => {
                         if (sign === 50) {
-                            this.gravityScale = 0.2
+                            this.createSpeed = this.createSpeed/2
                             // PhysicsSystem2D.instance.gravity = v2()
-                            if (this.forzenTimer) {
-                                clearTimeout(this.forzenTimer)
-                            }
-                            this.forzenTimer = setTimeout(() => {
-                                this.gravityScale = 1
-                                // PhysicsSystem2D.instance.gravity = v2(1)
-                                this.forzenTimer = 0
-                            }, 10000);
+                            // if (this.forzenTimer) {
+                            //     clearTimeout(this.forzenTimer)
+                            // }
+                            // this.forzenTimer = setTimeout(() => {
+                            //     this.gravityScale = 1
+                            //     // PhysicsSystem2D.instance.gravity = v2(1)
+                            //     this.forzenTimer = 0
+                            // }, 10000);
                         }
                         if (sign === 49) {
-                            this.speed = 0.005
-                            if (this.speedTimer) {
-                                clearTimeout(this.speedTimer)
-                            }
-                            this.speedTimer = setTimeout(() => {
-                                this.speed = 0.01
-                                // PhysicsSystem2D.instance.gravity = v2(1)
-                                this.speedTimer = 0
-                            }, 10000);
+                            this.speed = this.speed/2
+                            // this.bulletSpeed = 10
+                            // if (this.speedTimer) {
+                            //     clearTimeout(this.speedTimer)
+                            // }
+                            // this.speedTimer = setTimeout(() => {
+                            //     this.speed = 0.01
+                            //     this.bulletSpeed = 5
+                            //     // PhysicsSystem2D.instance.gravity = v2(1)
+                            //     this.speedTimer = 0
+                            // }, 10000);
+                        }
+                        if (sign === 48) {
+                            this.newNodes.forEach(node=> {
+                                node.active && node.destroy()
+                            })
+                            this.newNodes = []
+                            // this.bulletSpeed = 10
+                            // if (this.bulletTimer) {
+                            //     clearTimeout(this.speedTimer)
+                            // }
+                            // this.bulletTimer = setTimeout(() => {
+                            //     this.bulletSpeed = 5
+                            //     // PhysicsSystem2D.instance.gravity = v2(1)
+                            //     this.bulletTimer = 0
+                            // }, 10000);
                         }
                         if (selfCollider.node.name.indexOf('10') !== -1) {
                             this.count+=10
@@ -185,7 +209,7 @@ export class staffFall extends Component {
         let newNode:Node;
         return function() {
             if (newNode) {
-                distance+=5
+                distance+=this.bulletSpeed
                 outRay.computeHit(tempVec, distance)//计算射线上的点坐标
                 // console.log(newNode)
                 newNode.active && newNode.setPosition(tempVec)
@@ -193,13 +217,15 @@ export class staffFall extends Component {
                 // this.pointNodePool.refundNode(newNode)
                 return newNode
             }
+            
             outRay.computeHit(tempVec, distance)//计算射线上的点坐标
             // newNode = this.pointNodePool.copyNode(this.point)
             newNode = instantiate(this.point)
+            this.newNodes.push(newNode)
             newNode.setPosition(tempVec)
             this.node.parent.addChild(newNode)
             newNode.active = true
-            distance+=5
+            distance+=100
             return newNode
         }
     }
