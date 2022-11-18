@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label, PhysicsSystem2D, UITransform, Size } from 'cc';
+import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label, PhysicsSystem2D, UITransform, Size, Sprite, v2 } from 'cc';
 const { ccclass, property } = _decorator;
 import NodeCache from '../utils/NodeCache';
 
@@ -46,6 +46,8 @@ export class staffFall extends Component {
     gravityScale:number = 1;
 
     forzenTimer:number = 0
+    speedTimer:number = 0
+    speed:number = 0.01
     // [2]
     // @property
     // serializableDummy = 0;
@@ -79,80 +81,7 @@ export class staffFall extends Component {
     randomBallNode() {
         const sign = randomInt(1, 50)
     }
-    createBall() {
-        let newNode:Node;
-        const sign = randomInt(1, 50)
-        if (sign === 50) {
-            newNode = instantiate(this.forzenBall)
-            const x = randomInt(-450, 10)
-            newNode.setPosition(x, 330)
-            newNode.active = true
-            this.node.parent.addChild(newNode)
-            const collider = newNode.getComponent(Collider2D)
-            if (collider) {
-                collider.on(Contact2DType.BEGIN_CONTACT, (selfCollider: Collider2D, otherCollider: Collider2D)=>{
-                    if (otherCollider.node.name === this.point.name) {
-                        
-                        setTimeout(() => {
-                            this.gravityScale = 0.2
-                            if (this.forzenTimer) {
-                                clearTimeout(this.forzenTimer)
-                            }
-                            this.forzenTimer = setTimeout(() => {
-                                this.gravityScale = 1
-                                this.forzenTimer = 0
-                            }, 10000);
-                            otherCollider.node && otherCollider.node.destroy()
-                            selfCollider.node && selfCollider.node.destroy()
-                            // this.node.parent.removeChild(otherCollider.node)
-                            // this.pointNodePool.refundNode(otherCollider.node)
-                            // this.ballNodePool.refundNode(selfCollider.node)
-                        }, 1);
-                    }
-                }, this);
-            }
-        }
-        // if (newNode) {
-        //     this.ballNodePool.refundNode(newNode)
-        // }
-        // console.log(this.newNodeCount, this.deleteCount)
-        // newNode = this.ballNodePool.copyNode(this.ball)
-        newNode = instantiate(this.ball)
-        const x = randomInt(-450, 10)
-        const UI = newNode.getComponent(UITransform)
-        UI.contentSize = this.randomSize(newNode)
-        newNode.setPosition(x, 330)
-        newNode.active = true
-        this.node.parent.addChild(newNode)
-        const collider = newNode.getComponent(Collider2D)
-        const rigidBody = newNode.getComponent(RigidBody2D)
-        rigidBody.gravityScale = this.gravityScale
-        if (collider) {
-            collider.on(Contact2DType.BEGIN_CONTACT, (selfCollider: Collider2D, otherCollider: Collider2D)=>{
-                if (otherCollider.node.name === this.point.name) {
-                    
-                    setTimeout(() => {
-                        if (selfCollider.node.name.indexOf('10') !== -1) {
-                            this.count+=10
-                        }
-                        if (selfCollider.node.name.indexOf('20') !== -1) {
-                            this.count+=10
-                        }
-                        if (selfCollider.node.name.indexOf('5') !== -1) {
-                            this.count+=10
-                        }
-                        this.score.string = `得分:${this.count}`
-                        otherCollider.node && otherCollider.node.destroy()
-                        selfCollider.node && selfCollider.node.destroy()
-                        // this.node.parent.removeChild(otherCollider.node)
-                        // this.pointNodePool.refundNode(otherCollider.node)
-                        // this.ballNodePool.refundNode(selfCollider.node)
-                    }, 1);
-                }
-            }, this);
-        }
     
-    }
     randomSize(node:Node) {
         const sign = randomInt(1,3)
         switch(sign) {
@@ -169,12 +98,80 @@ export class staffFall extends Component {
                 return new Size(20, 20)
         }
     }
+    createBall() {
+        let newNode:Node;
+        const sign = randomInt(1, 50)
+        newNode = instantiate(this.ball)
+        const x = randomInt(-450, 10)
+        
+        if (sign === 50) {
+            const sprite = newNode.getComponent(Sprite)
+            sprite.color = math.color(0, 0, 255)
+        } else if (sign === 49) {
+            const sprite = newNode.getComponent(Sprite)
+            sprite.color = math.color(255, 255, 0)
+        }
+        else {
+            const UI = newNode.getComponent(UITransform)
+            UI.contentSize = this.randomSize(newNode)
+            const rigidBody = newNode.getComponent(RigidBody2D)
+            rigidBody.gravityScale = this.gravityScale
+        }
+        newNode.setPosition(x, 330)
+        newNode.active = true
+        this.node.parent.addChild(newNode)
+        const collider = newNode.getComponent(Collider2D)
+        if (collider) {
+            collider.on(Contact2DType.BEGIN_CONTACT, (selfCollider: Collider2D, otherCollider: Collider2D)=>{
+                if (otherCollider.node.name === this.point.name) {
+                    
+                    setTimeout(() => {
+                        if (sign === 50) {
+                            this.gravityScale = 0.2
+                            // PhysicsSystem2D.instance.gravity = v2()
+                            if (this.forzenTimer) {
+                                clearTimeout(this.forzenTimer)
+                            }
+                            this.forzenTimer = setTimeout(() => {
+                                this.gravityScale = 1
+                                // PhysicsSystem2D.instance.gravity = v2(1)
+                                this.forzenTimer = 0
+                            }, 10000);
+                        }
+                        if (sign === 49) {
+                            this.speed = 0.005
+                            if (this.speedTimer) {
+                                clearTimeout(this.speedTimer)
+                            }
+                            this.speedTimer = setTimeout(() => {
+                                this.speed = 0.01
+                                // PhysicsSystem2D.instance.gravity = v2(1)
+                                this.speedTimer = 0
+                            }, 10000);
+                        }
+                        if (selfCollider.node.name.indexOf('10') !== -1) {
+                            this.count+=10
+                        }
+                        if (selfCollider.node.name.indexOf('20') !== -1) {
+                            this.count+=10
+                        }
+                        if (selfCollider.node.name.indexOf('5') !== -1) {
+                            this.count+=10
+                        }
+                        this.score.string = `得分:${this.count}`
+                        otherCollider.node && otherCollider.node.destroy()
+                        selfCollider.node && selfCollider.node.destroy()
+                    }, 1);
+                }
+            }, this);
+        }
+    }
     onMouseDown(event) {
         const size = view.getVisibleSize()
         const point = new Vec3(event.getUILocation().x-size.x/2, event.getUILocation().y-size.y/2)
         // this.unscheduleAllCallbacks()
         // this.unschedule(this.callback)
-        console.log(point.x, point.y)
+        // console.log(point.x, point.y)
         this.onAttak(point)
     }
 
@@ -208,10 +205,18 @@ export class staffFall extends Component {
     }
     onAttak(point:Vec3) {
         const outRay = new geometry.Ray()
-
+        // let newNode:Node;
+        // let tempVec = new Vec3()
         geometry.Ray.fromPoints(outRay, this.tower.getPosition(), point)
+        // outRay.computeHit(tempVec, 100)
+        // console.log(tempVec.x, tempVec.y)
+        // newNode = instantiate(this.point)
+        // newNode.setPosition(tempVec)
+        // this.node.parent.addChild(newNode)
+        // const rigidBody = newNode.getComponent(RigidBody2D)
+        // rigidBody.applyForce(new math.Vec2(200, 0), new math.Vec2(tempVec.x, tempVec.y), false)
         
-        this.schedule(this.createLine(outRay), 0.01)
+        this.schedule(this.createLine(outRay), this.speed)
     }
 
 
