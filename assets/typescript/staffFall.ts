@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label, PhysicsSystem2D } from 'cc';
+import { _decorator, Component, Node, Collider2D, Contact2DType, RigidBody2D, Vec2, math, Vec3, view, geometry, instantiate, Label, PhysicsSystem2D, UITransform, Size } from 'cc';
 const { ccclass, property } = _decorator;
 import NodeCache from '../utils/NodeCache';
 
@@ -81,6 +81,8 @@ export class staffFall extends Component {
             newNode = instantiate(this.ball)
             this.newNodeCount++;
             const x = randomInt(-450, 10)
+            const UI = newNode.getComponent(UITransform)
+            UI.contentSize = this.randomSize(newNode)
             newNode.setPosition(x, 330)
             newNode.active = true
             this.node.parent.addChild(newNode)
@@ -90,7 +92,15 @@ export class staffFall extends Component {
                     if (otherCollider.node.name === this.point.name) {
                         
                         setTimeout(() => {
-                            this.count++
+                            if (selfCollider.node.name.indexOf('10') !== -1) {
+                                this.count+=10
+                            }
+                            if (selfCollider.node.name.indexOf('20') !== -1) {
+                                this.count+=10
+                            }
+                            if (selfCollider.node.name.indexOf('5') !== -1) {
+                                this.count+=10
+                            }
                             this.score.string = `得分:${this.count}`
                             otherCollider.node && otherCollider.node.destroy()
                             selfCollider.node && selfCollider.node.destroy()
@@ -101,6 +111,22 @@ export class staffFall extends Component {
                     }
                 }, this);
             }
+        }
+    }
+    randomSize(node:Node) {
+        const sign = randomInt(1,3)
+        switch(sign) {
+            case 1:
+                node.name = `ball 10`
+                return new Size(10, 10)
+            case 2:
+                node.name = `ball 5`
+                return new Size(20, 20)
+            case 3:
+                node.name = `ball 20`
+                return new Size(5, 5)
+            default:
+                return new Size(20, 20)
         }
     }
     onMouseDown(event) {
