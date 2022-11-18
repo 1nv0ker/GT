@@ -135,6 +135,8 @@ export class staffFall extends Component {
                     setTimeout(() => {
                         if (sign === 50) {
                             this.createSpeed = this.createSpeed/2
+                            this.unschedule(this.createBall)
+                            this.schedule(this.createBall, this.createSpeed)
                             // PhysicsSystem2D.instance.gravity = v2()
                             // if (this.forzenTimer) {
                             //     clearTimeout(this.forzenTimer)
@@ -158,21 +160,21 @@ export class staffFall extends Component {
                             //     this.speedTimer = 0
                             // }, 10000);
                         }
-                        if (sign === 48) {
-                            this.newNodes.forEach(node=> {
-                                node.active && node.destroy()
-                            })
-                            this.newNodes = []
-                            // this.bulletSpeed = 10
-                            // if (this.bulletTimer) {
-                            //     clearTimeout(this.speedTimer)
-                            // }
-                            // this.bulletTimer = setTimeout(() => {
-                            //     this.bulletSpeed = 5
-                            //     // PhysicsSystem2D.instance.gravity = v2(1)
-                            //     this.bulletTimer = 0
-                            // }, 10000);
-                        }
+                        // if (sign === 48) {
+                        //     this.newNodes.forEach(node=> {
+                        //         node.active && node.destroy()
+                        //     })
+                        //     this.newNodes = []
+                        //     // this.bulletSpeed = 10
+                        //     // if (this.bulletTimer) {
+                        //     //     clearTimeout(this.speedTimer)
+                        //     // }
+                        //     // this.bulletTimer = setTimeout(() => {
+                        //     //     this.bulletSpeed = 5
+                        //     //     // PhysicsSystem2D.instance.gravity = v2(1)
+                        //     //     this.bulletTimer = 0
+                        //     // }, 10000);
+                        // }
                         if (selfCollider.node.name.indexOf('10') !== -1) {
                             this.count+=10
                         }
@@ -221,9 +223,9 @@ export class staffFall extends Component {
             outRay.computeHit(tempVec, distance)//计算射线上的点坐标
             // newNode = this.pointNodePool.copyNode(this.point)
             newNode = instantiate(this.point)
-            this.newNodes.push(newNode)
+            // this.newNodes.push(newNode)
             newNode.setPosition(tempVec)
-            this.node.parent.addChild(newNode)
+            // this.node.parent.addChild(newNode)
             newNode.active = true
             distance+=100
             return newNode
