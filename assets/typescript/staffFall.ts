@@ -23,6 +23,9 @@ export class staffFall extends Component {
     ball:Node;
 
     @property(Node)
+    forzenBall:Node;
+
+    @property(Node)
     point:Node;
 
     @property(Node)
@@ -40,6 +43,9 @@ export class staffFall extends Component {
     callbacks:Function[] = [];
 
     count:number = 0;
+    gravityScale:number = 1;
+
+    forzenTimer:number = 0
     // [2]
     // @property
     // serializableDummy = 0;
@@ -68,21 +74,17 @@ export class staffFall extends Component {
     }
 
     initBalls() {
-        this.schedule(this.createBall(), 0.1)
+        this.schedule(this.createBall, 0.1)
+    }
+    randomBallNode() {
+        const sign = randomInt(1, 50)
     }
     createBall() {
-        return function() {
-            let newNode:Node;
-            // if (newNode) {
-            //     this.ballNodePool.refundNode(newNode)
-            // }
-            // console.log(this.newNodeCount, this.deleteCount)
-            // newNode = this.ballNodePool.copyNode(this.ball)
-            newNode = instantiate(this.ball)
-            this.newNodeCount++;
+        let newNode:Node;
+        const sign = randomInt(1, 50)
+        if (sign === 50) {
+            newNode = instantiate(this.forzenBall)
             const x = randomInt(-450, 10)
-            const UI = newNode.getComponent(UITransform)
-            UI.contentSize = this.randomSize(newNode)
             newNode.setPosition(x, 330)
             newNode.active = true
             this.node.parent.addChild(newNode)
@@ -92,16 +94,14 @@ export class staffFall extends Component {
                     if (otherCollider.node.name === this.point.name) {
                         
                         setTimeout(() => {
-                            if (selfCollider.node.name.indexOf('10') !== -1) {
-                                this.count+=10
+                            this.gravityScale = 0.2
+                            if (this.forzenTimer) {
+                                clearTimeout(this.forzenTimer)
                             }
-                            if (selfCollider.node.name.indexOf('20') !== -1) {
-                                this.count+=10
-                            }
-                            if (selfCollider.node.name.indexOf('5') !== -1) {
-                                this.count+=10
-                            }
-                            this.score.string = `得分:${this.count}`
+                            this.forzenTimer = setTimeout(() => {
+                                this.gravityScale = 1
+                                this.forzenTimer = 0
+                            }, 10000);
                             otherCollider.node && otherCollider.node.destroy()
                             selfCollider.node && selfCollider.node.destroy()
                             // this.node.parent.removeChild(otherCollider.node)
@@ -112,6 +112,46 @@ export class staffFall extends Component {
                 }, this);
             }
         }
+        // if (newNode) {
+        //     this.ballNodePool.refundNode(newNode)
+        // }
+        // console.log(this.newNodeCount, this.deleteCount)
+        // newNode = this.ballNodePool.copyNode(this.ball)
+        newNode = instantiate(this.ball)
+        const x = randomInt(-450, 10)
+        const UI = newNode.getComponent(UITransform)
+        UI.contentSize = this.randomSize(newNode)
+        newNode.setPosition(x, 330)
+        newNode.active = true
+        this.node.parent.addChild(newNode)
+        const collider = newNode.getComponent(Collider2D)
+        const rigidBody = newNode.getComponent(RigidBody2D)
+        rigidBody.gravityScale = this.gravityScale
+        if (collider) {
+            collider.on(Contact2DType.BEGIN_CONTACT, (selfCollider: Collider2D, otherCollider: Collider2D)=>{
+                if (otherCollider.node.name === this.point.name) {
+                    
+                    setTimeout(() => {
+                        if (selfCollider.node.name.indexOf('10') !== -1) {
+                            this.count+=10
+                        }
+                        if (selfCollider.node.name.indexOf('20') !== -1) {
+                            this.count+=10
+                        }
+                        if (selfCollider.node.name.indexOf('5') !== -1) {
+                            this.count+=10
+                        }
+                        this.score.string = `得分:${this.count}`
+                        otherCollider.node && otherCollider.node.destroy()
+                        selfCollider.node && selfCollider.node.destroy()
+                        // this.node.parent.removeChild(otherCollider.node)
+                        // this.pointNodePool.refundNode(otherCollider.node)
+                        // this.ballNodePool.refundNode(selfCollider.node)
+                    }, 1);
+                }
+            }, this);
+        }
+    
     }
     randomSize(node:Node) {
         const sign = randomInt(1,3)

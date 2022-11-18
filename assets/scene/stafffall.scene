@@ -435,7 +435,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -129.728,
-      "y": 332.349,
+      "y": 221.349,
       "z": 0
     },
     "_lrot": {
@@ -471,8 +471,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 10,
-      "height": 10
+      "width": 20,
+      "height": 20
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -496,9 +496,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
+      "r": 0,
       "g": 0,
-      "b": 0,
+      "b": 255,
       "a": 255
     },
     "_spriteFrame": {
@@ -1009,6 +1009,9 @@
     "__prefab": null,
     "ball": {
       "__id__": 5
+    },
+    "forzenBall": {
+      "__id__": 10
     },
     "point": {
       "__id__": 15
