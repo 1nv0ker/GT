@@ -225,7 +225,7 @@ export class staffFall extends Component {
             newNode = instantiate(this.point)
             // this.newNodes.push(newNode)
             newNode.setPosition(tempVec)
-            // this.node.parent.addChild(newNode)
+            this.node.parent.addChild(newNode)
             newNode.active = true
             distance+=100
             return newNode
